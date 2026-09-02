@@ -92,6 +92,18 @@ const SURFACES = {
       }
     },
   },
+  redLeaf: {
+    paint(px, rnd) {
+      px.rect(0, 0, SIZE, SIZE, '#c23a2e');
+      speckle(px, rnd, 22, '#e8553f');
+      speckle(px, rnd, 18, '#8e2420');
+      for (let i = 0; i < 4; i++) {
+        const x = (rnd() * (SIZE - 2)) | 0;
+        const y = (rnd() * (SIZE - 2)) | 0;
+        px.rect(x, y, 2, 2, '#f58a4a');
+      }
+    },
+  },
   bark: {
     paint(px, rnd) {
       px.rect(0, 0, SIZE, SIZE, '#8a5a34');

@@ -17,6 +17,7 @@ export const DEFAULT_BINDINGS = {
   down: ['ArrowDown', 'KeyS'],
   jump: ['Space', 'KeyK', 'KeyZ'],
   action: ['KeyJ', 'KeyX', 'ShiftLeft', 'ShiftRight'],
+  reload: ['F9'],
 };
 
 /** Standard-mapping gamepad button indices -> actions. */
@@ -25,7 +26,7 @@ export const GAMEPAD_BUTTONS = {
   1: 'action', // B / Circle / A(Switch)
   2: 'action', // X / Square / Y(Switch)
   12: 'up',
-  13: 'down',
+  13: 'reload', // d-pad down: hard-reload the page (dev convenience on the Xbox); walk with the stick
   14: 'left',
   15: 'right',
 };

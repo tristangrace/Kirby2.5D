@@ -25,6 +25,7 @@ const tiles = new Map(
     wall: { top: 'stone', side: 'stone', height: 2, walkable: true },
     hedge: { top: 'leaf', side: 'leaf', height: 1, walkable: true },
     tree: { top: 'leaf', side: 'bark', height: 2.2, walkable: true },
+    redTree: { top: 'redLeaf', side: 'bark', height: 2.2, walkable: true },
     water: { top: 'water', side: 'water', height: -0.4, walkable: false, liquid: true },
   }),
 );

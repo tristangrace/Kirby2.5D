@@ -23,6 +23,19 @@ setInterval(() => {
   if (hint.textContent !== text) hint.textContent = text;
 }, 250);
 
+// D-pad down (or F9): reload with the HTTP cache bypassed so a fresh deploy shows up immediately.
+async function hardReload() {
+  try {
+    if (window.caches) for (const key of await caches.keys()) await caches.delete(key);
+  } catch {}
+  const url = new URL(location.href);
+  url.searchParams.set('r', Date.now().toString(36));
+  location.replace(url.toString());
+}
+game.events.on('frame', () => {
+  if (game.input.justPressed('reload')) hardReload();
+});
+
 // Fullscreen toggle (TV browsers and tablets). Needs a user gesture, so it is a button.
 const fsButton = document.getElementById('fullscreen');
 fsButton.addEventListener('click', () => {

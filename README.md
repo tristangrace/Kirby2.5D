@@ -30,6 +30,8 @@ Game Boy layout: A jumps, B inhales.
   again to spit it out as a star. Stars (and air puffs, from pressing B while
   floating) hurt enemies.
 - Landing in water costs a heart and puts him back on the last dry ground.
+- D-pad down (or F9) hard-reloads the page with the cache bypassed, so a
+  fresh deploy shows up straight away on the Xbox. Walk with the stick.
 
 The fullscreen button sits top-right. On an iPad, Share > Add to Home Screen
 installs it as a full-screen app.
