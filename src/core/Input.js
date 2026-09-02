@@ -19,6 +19,7 @@ export const DEFAULT_BINDINGS = {
   action: ['KeyJ', 'KeyX', 'ShiftLeft', 'ShiftRight'],
   reload: ['F9'],
   start: ['Enter'],
+  mute: ['KeyM'],
 };
 
 /** Standard-mapping gamepad button indices -> actions. */

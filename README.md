@@ -64,6 +64,18 @@ logotype) are copied verbatim, with the theme CSS trimmed to what this game
 uses in `src/ui/theme.js`. The title (`src/ui/Title.js`) pauses the world,
 drifts stars over a dusk scrim and starts on any button, Enter, Start or a tap.
 
+## Music and sound
+
+The soundtrack and effects are the 3D Kirby repo's synthesised audio
+engine (`src/audio/`, copied verbatim apart from a small settings shim):
+a Web Audio mixer with reverb, delay and a limiter, a procedural score
+(title, field and boss themes with a swing feel and intensity that tightens
+as Whispy's health drops) and synthesised effects for jumping, puffing,
+inhaling, spitting, stars, hits, damage, menus and the fanfare. No audio
+files. `src/audio/hooks.js` maps this game's events onto the engine's and
+keeps the listener at the camera's focus point. Audio starts on the first
+key or tap (browser rule); M mutes.
+
 ## Shop and abilities
 
 Defeated enemies pop out point stars (Whispy drops a pile), and more lie

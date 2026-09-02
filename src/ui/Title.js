@@ -72,6 +72,7 @@ export class Title {
     this.wipe = null;
     this.game.paused = true;
     this.game.input.endFrame();
+    this.game.events.emit('title:show');
   }
 
   /** Wipe to white, unpause, fade the wipe away. */

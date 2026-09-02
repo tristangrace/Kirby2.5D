@@ -169,6 +169,7 @@ export class Player extends SpriteEntity {
     }
     if (this.nearShop && input.justPressed('action')) {
       this.inhaling = false;
+      this.setInhaleSound(false);
       this.attacking = false;
       this.game.events.emit('shop:open', this.nearShop);
       return;
@@ -185,6 +186,18 @@ export class Player extends SpriteEntity {
       if (this.flying) this.exhale();
       else if (this.full) this.spit();
       else this.inhaling = true;
+    }
+    this.setInhaleSound(this.inhaling);
+
+    // Footsteps while walking on the ground.
+    if (this.grounded && moving && !this.inhaling && !this.attacking) {
+      this.stepTimer = (this.stepTimer ?? 0) - dt;
+      if (this.stepTimer <= 0) {
+        this.stepTimer = 0.26;
+        this.game.events.emit('kirby:footstep', { position: this.position });
+      }
+    } else {
+      this.stepTimer = 0;
     }
 
     // Walk. Inhaling roots him; a mouthful or a puffed body slows him.
@@ -206,13 +219,18 @@ export class Player extends SpriteEntity {
         this.vy = this.full ? JUMP_SPEED * 0.72 : JUMP_SPEED;
         this.grounded = false;
         this.airborne = true;
+        this.game.events.emit('kirby:jump', { position: this.position });
       } else if (this.flying) {
         this.vy = Math.max(this.vy, 0) * 0.3 + FLAP_SPEED;
         this.playOneShot('flap');
+        this.puffCount = Math.min(8, (this.puffCount ?? 1) + 1);
+        this.game.events.emit('kirby:puff', { position: this.position, count: this.puffCount });
       } else if (!this.full && !this.inhaling && !this.attacking) {
         this.flying = true;
         this.vy = FLAP_SPEED;
         this.playOneShot('flap');
+        this.puffCount = 1;
+        this.game.events.emit('kirby:puff', { position: this.position, count: 1 });
       }
     }
 
@@ -257,6 +275,14 @@ export class Player extends SpriteEntity {
       this.flying = false;
       this.oneShot = null;
     }
+    this.game.events.emit('kirby:land', { position: this.position, force: Math.min(1, Math.abs(this.vy) / 10) });
+  }
+
+  /** Start / stop the inhale sound bed without spamming the bus. */
+  setInhaleSound(active) {
+    if (this._inhaleSound === active) return;
+    this._inhaleSound = active;
+    this.game.events.emit(active ? 'inhale:start' : 'inhale:stop', { position: this.position });
   }
 
   /** Fell in the water: splash, lose a heart, back to dry land. */
@@ -296,6 +322,7 @@ export class Player extends SpriteEntity {
     if (!def.hold) {
       if (!input.justPressed('action') || this.abilityTimer > 0) return;
       this.playOneShot('spit');
+      this.game.events.emit(this.ability === 'sword' ? 'kirby:spit' : 'star:collected', { position: this.position });
       if (this.ability === 'sword') {
         this.abilityTimer = 0.32;
         spawn({ kind: 'slash', x: this.position.x + _dir.x * 0.8, y: this.position.y + 0.35, z: this.position.z + _dir.z * 0.8, life: 0.16, damage: 2, pierce: true });
@@ -318,8 +345,16 @@ export class Player extends SpriteEntity {
       return;
     }
 
-    if (!input.isDown('action')) return;
+    if (!input.isDown('action')) {
+      this.holdSound = 0;
+      return;
+    }
     this.attacking = true;
+    this.holdSound = (this.holdSound ?? 0) - dt;
+    if (this.holdSound <= 0) {
+      this.holdSound = this.ability === 'spark' ? 0.18 : 0.3;
+      this.game.events.emit(this.ability === 'spark' ? 'enemy:hit' : 'kirby:exhale', { position: this.position });
+    }
     if (this.abilityTimer > 0) return;
     if (this.ability === 'fire') {
       this.abilityTimer = 0.07;
@@ -382,6 +417,7 @@ export class Player extends SpriteEntity {
     this.full = false;
     this.mouthful = null;
     this.playOneShot('spit');
+    this.game.events.emit('kirby:spit', { position: this.position });
     this.game.spawn('projectile', {
       kind: 'star',
       team: 'player',
@@ -400,6 +436,7 @@ export class Player extends SpriteEntity {
     const m = this.mouthPoint();
     this.flying = false;
     this.playOneShot('exhale');
+    this.game.events.emit('kirby:exhale', { position: this.position });
     this.game.spawn('projectile', {
       kind: 'puff',
       team: 'player',
@@ -436,6 +473,8 @@ export class Player extends SpriteEntity {
     }
     this.invulnTimer = 1.6;
     this.flash('#ff8080', 0.25);
+    this.setInhaleSound(false);
+    this.game.events.emit('player:damaged', { source: source?.position, position: this.position });
     this.game.spawn('effect', { kind: 'hit', x: this.position.x, y: this.position.y + 0.5, z: this.position.z });
 
     if (this.hp <= 0) {

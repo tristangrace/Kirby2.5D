@@ -59,6 +59,7 @@ export class PointStar extends SpriteEntity {
     const p = this.game.player;
     if (p && p.alive && p.state !== 'dead' && this.overlaps(p)) {
       p.addStars(1);
+      this.game.events.emit('star:collected', { position: this.position });
       this.destroy();
       return;
     }

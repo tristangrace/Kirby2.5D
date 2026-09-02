@@ -70,6 +70,7 @@ export class Enemy extends SpriteEntity {
   onSwallowed() {
     this.game.player?.onSwallow(this);
     this.game.events.emit('enemy:swallowed', this);
+    this.game.events.emit('enemy:inhaled', { position: this.position });
     this.destroy();
   }
 
@@ -84,6 +85,7 @@ export class Enemy extends SpriteEntity {
     if (!this.alive) return false;
     this.hp -= amount;
     this.flash();
+    this.game.events.emit('enemy:hit', { position: this.position });
     if (this.hp <= 0) {
       this.die(source);
     } else {

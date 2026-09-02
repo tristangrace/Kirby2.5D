@@ -4,6 +4,7 @@ import { useStyles } from './ui/theme.js';
 import { Hud } from './ui/Hud.js';
 import { Title } from './ui/Title.js';
 import { Shop } from './ui/Shop.js';
+import { installAudio } from './audio/hooks.js';
 
 useStyles();
 const container = document.getElementById('game');
@@ -12,6 +13,7 @@ const game = new Game(container);
 const hud = new Hud(game, ui);
 const title = new Title(game, ui);
 const shop = new Shop(game, ui);
+const audio = installAudio(game);
 game.loadLevel('greenGreens');
 game.start();
 title.show();
@@ -21,7 +23,7 @@ const touch = new TouchControls(document.body, game.input);
 
 // Controls hint follows whichever device was used last.
 const HINTS = {
-  keyboard: 'WASD: walk · K / Space: jump, again to fly · J: inhale, spit, ability · shops sell abilities',
+  keyboard: 'WASD: walk · K / Space: jump, again to fly · J: inhale, spit, ability · M: mute',
   gamepad: 'Stick: walk · A: jump, again to fly · B / X: inhale, spit, exhale',
   touch: 'Drag left side: walk · A: jump, again to fly · B: inhale, spit, exhale',
 };
@@ -59,4 +61,5 @@ if (import.meta.env.DEV) {
   window.__hud = hud;
   window.__title = title;
   window.__shop = shop;
+  window.__audio = audio;
 }

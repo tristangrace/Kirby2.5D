@@ -71,6 +71,8 @@ export class Shop {
     this.el.hidden = true;
     this.game.paused = false;
     this.game.input.endFrame();
+    this.game.events.emit('ui:cancel');
+    this.game.events.emit('shop:close');
   }
 
   refresh() {
@@ -90,6 +92,7 @@ export class Shop {
   move(delta) {
     this.index = (this.index + delta + this.items.length) % this.items.length;
     this.msg.textContent = '';
+    this.game.events.emit('ui:move');
     this.refresh();
   }
 
@@ -98,8 +101,10 @@ export class Shop {
     const it = this.items[this.index];
     if (p.equip(it.name)) {
       this.msg.textContent = it.name ? it.label + ' equipped!' : 'Back to normal.';
+      this.game.events.emit('ui:confirm');
     } else {
       this.msg.textContent = 'Not enough stars. Beat enemies to earn more.';
+      this.game.events.emit('ui:cancel');
     }
     this.refresh();
   }
