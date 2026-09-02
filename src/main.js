@@ -1,12 +1,18 @@
 import { Game } from './Game.js';
 import { TouchControls } from './core/TouchControls.js';
+import { useStyles } from './ui/theme.js';
 import { Hud } from './ui/Hud.js';
+import { Title } from './ui/Title.js';
 
+useStyles();
 const container = document.getElementById('game');
+const ui = document.getElementById('ui');
 const game = new Game(container);
-const hud = new Hud(game);
+const hud = new Hud(game, ui);
+const title = new Title(game, ui);
 game.loadLevel('greenGreens');
 game.start();
+title.show();
 
 // On-screen joystick for iPad and other touch devices (no-op elsewhere).
 const touch = new TouchControls(document.body, game.input);
@@ -17,11 +23,7 @@ const HINTS = {
   gamepad: 'Stick: walk · A: jump, again to fly · B / X: inhale, spit, exhale',
   touch: 'Drag left side: walk · A: jump, again to fly · B: inhale, spit, exhale',
 };
-const hint = document.getElementById('hint');
-setInterval(() => {
-  const text = HINTS[game.input.lastSource];
-  if (hint.textContent !== text) hint.textContent = text;
-}, 250);
+setInterval(() => hud.setHint(HINTS[game.input.lastSource]), 250);
 
 // D-pad down (or F9): reload with the HTTP cache bypassed so a fresh deploy shows up immediately.
 async function hardReload() {
@@ -53,4 +55,5 @@ if (import.meta.env.DEV) {
   window.__game = game;
   window.__touch = touch;
   window.__hud = hud;
+  window.__title = title;
 }

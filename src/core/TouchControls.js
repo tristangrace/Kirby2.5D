@@ -1,3 +1,5 @@
+import { buttonGlyph } from '../ui/icons.js';
+
 /**
  * On-screen controls for touch devices (iPad etc.): a floating joystick that
  * appears wherever the left side of the screen is touched, plus Game Boy
@@ -17,8 +19,8 @@ export class TouchControls {
     this.root.id = 'touch-controls';
     this.root.innerHTML =
       '<div class="stick"><div class="knob"></div></div>' +
-      '<button class="btn btn-b" data-action="action" aria-label="Inhale">B</button>' +
-      '<button class="btn btn-a" data-action="jump" aria-label="Jump">A</button>';
+      '<button class="btn btn-b" data-action="action" aria-label="Inhale">' + buttonGlyph('B', '#ff7a8f', 84) + '</button>' +
+      '<button class="btn btn-a" data-action="jump" aria-label="Jump">' + buttonGlyph('A', '#5ed67f', 84) + '</button>';
     container.appendChild(this.root);
 
     this.stick = this.root.querySelector('.stick');
@@ -49,7 +51,7 @@ export class TouchControls {
   }
 
   _pointerDown(e) {
-    if (this.buttons.includes(e.target) || this.stickPointer !== null) return;
+    if (e.target.closest?.('.btn') || this.stickPointer !== null) return;
     if (e.clientX > window.innerWidth * 0.6) return; // right side reserved for buttons
     e.preventDefault();
     this.stickPointer = e.pointerId;

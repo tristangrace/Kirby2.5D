@@ -55,6 +55,15 @@ Builds `dist/` and pushes it to the `gh-pages` branch, which GitHub Pages
 serves at https://tristangrace.github.io/Kirby2.5D/. Commit and push `main`
 separately for the source.
 
+## Title screen and UI
+
+The splash screen and HUD icons come from the 3D Kirby repo (`../Kirby`):
+`src/ui/icons.js` (hearts, star, Kirby face, crown, A/B button glyphs,
+sparkles, all inline SVG) and `src/ui/logo.js` (the stroke-built KIRBY
+logotype) are copied verbatim, with the theme CSS trimmed to what this game
+uses in `src/ui/theme.js`. The title (`src/ui/Title.js`) pauses the world,
+drifts stars over a dusk scrim and starts on any button, Enter, Start or a tap.
+
 ## Green Greens
 
 The first level runs west to east: the starting meadow, a plank bridge over
@@ -105,7 +114,10 @@ src/
     registry.js           type string -> class
     index.js              registers built-in entity types
   ui/
-    Hud.js                hearts, lives, mouthful, boss bar, banner (DOM)
+    Hud.js                hearts, lives, mouthful, boss bar, banner (DOM, icon SVGs)
+    Title.js              splash screen: logo, stars, Press Start, white wipe
+    icons.js, logo.js     inline SVG icon set and logotype (from ../Kirby)
+    theme.js, fonts.js    UI stylesheet and font stack
 ```
 
 ## How the 2.5D works

@@ -28,6 +28,7 @@ export class Game {
     this.level = null;
     this.player = null;
     this.entities = [];
+    this.paused = false; // title screen / menus: keep rendering, freeze the world
 
     this._setupLights();
     this.engine.onResize((w, h) => this.iso.setViewport(w, h));
@@ -80,8 +81,10 @@ export class Game {
   update(dt, elapsed) {
     this.input.update();
     // Iterate a snapshot: entities spawned mid-frame start updating next frame.
-    const current = this.entities.slice();
-    for (const e of current) if (e.alive) e.update(dt);
+    if (!this.paused) {
+      const current = this.entities.slice();
+      for (const e of current) if (e.alive) e.update(dt);
+    }
 
     if (this.entities.some((e) => !e.alive)) {
       for (const e of this.entities) if (!e.alive) e.onDespawn(this.scene);
