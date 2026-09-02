@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#1a1424" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <title>Kirby 2.5D</title>
+    <style>
+      html, body {
+        margin: 0; height: 100%; background: #1a1424; overflow: hidden;
+        touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+        overscroll-behavior: none;
+      }
+      #game { position: fixed; inset: 0; }
+      #game canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+      #hud {
+        position: fixed; left: max(12px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom));
+        pointer-events: none;
+        font: 12px/1.6 ui-monospace, "Courier New", monospace; color: #fff;
+        text-shadow: 2px 2px 0 #1a1424, -1px -1px 0 #1a1424, 1px -1px 0 #1a1424, -1px 1px 0 #1a1424;
+        letter-spacing: 1px;
+      }
+      #hud b { color: #ffb0cf; font-size: 14px; }
+      #fullscreen {
+        position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right));
+        width: 40px; height: 40px; border: 2px solid #fff; border-radius: 8px;
+        background: rgba(26, 20, 36, 0.6); color: #fff; font-size: 20px; line-height: 36px; text-align: center;
+        cursor: pointer; padding: 0; font-family: ui-monospace, monospace;
+      }
+      #fullscreen:hover { background: rgba(255, 176, 207, 0.6); }
+      #touch-controls { position: fixed; inset: 0; pointer-events: none; }
+      #touch-controls .stick {
+        position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.7); background: rgba(26, 20, 36, 0.35);
+        display: none; pointer-events: none;
+      }
+      #touch-controls .stick.active { display: block; }
+      #touch-controls .knob {
+        position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px;
+        border-radius: 50%; background: rgba(255, 176, 207, 0.9); border: 3px solid #fff; box-sizing: border-box;
+      }
+      #touch-controls .action-btn {
+        position: absolute; right: max(28px, env(safe-area-inset-right)); bottom: max(36px, env(safe-area-inset-bottom));
+        width: 84px; height: 84px; border-radius: 50%; border: 3px solid #fff;
+        background: rgba(224, 58, 72, 0.75); color: #fff; font: bold 32px ui-monospace, monospace;
+        pointer-events: auto; touch-action: none;
+      }
+      #touch-controls .action-btn:active { background: rgba(255, 176, 207, 0.95); }
+      #touch-controls { pointer-events: auto; }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BaPpY27z.js"></script>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="hud"><b>KIRBY 2.5D</b> &mdash; hello world<br /><span id="hint">WASD / Arrows: walk</span></div>
+    <button id="fullscreen" title="Fullscreen" aria-label="Fullscreen">&#x26F6;</button>
+  </body>
+</html>
