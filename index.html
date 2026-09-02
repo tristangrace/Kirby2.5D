@@ -19,81 +19,19 @@
       }
       #game { position: fixed; inset: 0; }
       #game canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
-      .pixel-text {
-        font: 12px/1.6 ui-monospace, "Courier New", monospace; color: #fff;
-        text-shadow: 2px 2px 0 #1a1424, -1px -1px 0 #1a1424, 1px -1px 0 #1a1424, -1px 1px 0 #1a1424;
-        letter-spacing: 1px;
-      }
-      #hud {
-        position: fixed; left: max(12px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom));
-        pointer-events: none;
-      }
-      #hud b { color: #ffb0cf; font-size: 14px; }
-      #hud .row { display: flex; align-items: center; gap: 10px; }
-      #hp { display: inline-flex; gap: 3px; }
-      #hp .pip {
-        display: inline-block; width: 12px; height: 12px; border: 2px solid #1a1424; box-sizing: border-box;
-        background: #3a2a48;
-      }
-      #hp .pip.on { background: #ff4a6a; box-shadow: inset -2px -2px 0 #b02838, inset 2px 2px 0 #ffb0cf; }
-      #mouth { color: #ffe14a; min-height: 1.6em; }
-      #boss {
-        position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
-        width: min(60vw, 360px); pointer-events: none; text-align: center;
-      }
-      #boss .bar {
-        height: 12px; border: 2px solid #1a1424; background: #3a2a48; box-sizing: border-box; margin-top: 2px;
-      }
-      #boss-fill { height: 100%; background: #6fd35c; transition: width 0.2s; }
-      #banner {
-        position: fixed; left: 0; right: 0; top: 34%; text-align: center; pointer-events: none;
-        font-size: 28px; color: #ffe14a; letter-spacing: 3px;
-        text-shadow: 3px 3px 0 #1a1424, -2px -2px 0 #1a1424, 2px -2px 0 #1a1424, -2px 2px 0 #1a1424;
-      }
       #fullscreen {
         position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right));
         width: 40px; height: 40px; border: 2px solid #fff; border-radius: 8px;
         background: rgba(26, 20, 36, 0.6); color: #fff; font-size: 20px; line-height: 36px; text-align: center;
-        cursor: pointer; padding: 0; font-family: ui-monospace, monospace;
+        cursor: pointer; padding: 0; font-family: ui-monospace, monospace; z-index: 5;
       }
       #fullscreen:hover { background: rgba(255, 176, 207, 0.6); }
-      #touch-controls { position: fixed; inset: 0; pointer-events: auto; }
-      #touch-controls .stick {
-        position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%;
-        border: 3px solid rgba(255, 255, 255, 0.7); background: rgba(26, 20, 36, 0.35);
-        display: none; pointer-events: none;
-      }
-      #touch-controls .stick.active { display: block; }
-      #touch-controls .knob {
-        position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px;
-        border-radius: 50%; background: rgba(255, 176, 207, 0.9); border: 3px solid #fff; box-sizing: border-box;
-      }
-      #touch-controls .btn {
-        position: absolute; width: 84px; height: 84px; border-radius: 50%; border: 3px solid #fff;
-        color: #fff; font: bold 32px ui-monospace, monospace; pointer-events: auto; touch-action: none;
-      }
-      #touch-controls .btn-a {
-        right: max(28px, env(safe-area-inset-right)); bottom: max(64px, env(safe-area-inset-bottom));
-        background: rgba(224, 58, 72, 0.75);
-      }
-      #touch-controls .btn-b {
-        right: calc(max(28px, env(safe-area-inset-right)) + 96px); bottom: max(28px, env(safe-area-inset-bottom));
-        background: rgba(74, 163, 232, 0.75);
-      }
-      #touch-controls .btn:active { background: rgba(255, 176, 207, 0.95); }
     </style>
-    <script type="module" crossorigin src="./assets/index-EIM0TgZ3.js"></script>
+    <script type="module" crossorigin src="./assets/index-B_8oEZPY.js"></script>
   </head>
   <body>
     <div id="game"></div>
-    <div id="hud" class="pixel-text">
-      <div class="row"><b>KIRBY 2.5D</b> <span id="level-name"></span></div>
-      <div class="row"><span id="hp"></span><span id="lives">x3</span></div>
-      <div id="mouth"></div>
-      <span id="hint">WASD: walk</span>
-    </div>
-    <div id="boss" class="pixel-text" hidden><span>WHISPY WOODS</span><div class="bar"><div id="boss-fill"></div></div></div>
-    <div id="banner" class="pixel-text" hidden></div>
+    <div id="ui" class="kb-layer"></div>
     <button id="fullscreen" title="Fullscreen" aria-label="Fullscreen">&#x26F6;</button>
   </body>
 </html>
