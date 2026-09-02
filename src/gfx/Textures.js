@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { PixelBuffer, seededRandom, hashString } from './PixelArt.js';
 
 /**
@@ -14,17 +15,33 @@ function speckle(px, rnd, count, color) {
   for (let i = 0; i < count; i++) px.set((rnd() * SIZE) | 0, (rnd() * SIZE) | 0, color);
 }
 
+function paintGrass(px, rnd) {
+  px.rect(0, 0, SIZE, SIZE, '#5fc84e');
+  speckle(px, rnd, 26, '#7be066');
+  speckle(px, rnd, 14, '#47a83a');
+  for (let i = 0; i < 5; i++) {
+    const x = (rnd() * SIZE) | 0;
+    const y = (rnd() * (SIZE - 2)) | 0;
+    px.set(x, y, '#3d9432');
+    px.set(x, y + 1, '#3d9432');
+  }
+}
+
 const SURFACES = {
-  grass: {
+  grass: { paint: paintGrass },
+  flowers: {
     paint(px, rnd) {
-      px.rect(0, 0, SIZE, SIZE, '#5fc84e');
-      speckle(px, rnd, 26, '#7be066');
-      speckle(px, rnd, 14, '#47a83a');
-      for (let i = 0; i < 5; i++) {
-        const x = (rnd() * SIZE) | 0;
-        const y = (rnd() * (SIZE - 2)) | 0;
-        px.set(x, y, '#3d9432');
-        px.set(x, y + 1, '#3d9432');
+      paintGrass(px, rnd);
+      const colors = ['#fff1a8', '#ff8fb3', '#ffffff', '#ffd05a'];
+      for (let i = 0; i < 4; i++) {
+        const x = 1 + ((rnd() * (SIZE - 3)) | 0);
+        const y = 1 + ((rnd() * (SIZE - 3)) | 0);
+        const c = colors[i % colors.length];
+        px.set(x, y, c);
+        px.set(x + 1, y, c);
+        px.set(x, y + 1, c);
+        px.set(x + 1, y + 1, c);
+        px.set(x + 1, y + 2, '#3d9432');
       }
     },
   },
@@ -53,6 +70,36 @@ const SURFACES = {
       px.rect(12, 8, 1, 8, '#7c8290');
     },
   },
+  wood: {
+    paint(px, rnd) {
+      px.rect(0, 0, SIZE, SIZE, '#c98c4e');
+      for (let y = 0; y < SIZE; y += 4) px.rect(0, y, SIZE, 1, '#8c5a2b');
+      speckle(px, rnd, 14, '#b57a3e');
+      speckle(px, rnd, 8, '#dca062');
+      px.rect(2, 1, 1, 2, '#6e4520');
+      px.rect(11, 9, 1, 2, '#6e4520');
+    },
+  },
+  leaf: {
+    paint(px, rnd) {
+      px.rect(0, 0, SIZE, SIZE, '#3f9e3a');
+      speckle(px, rnd, 22, '#5cc251');
+      speckle(px, rnd, 18, '#2f7d2c');
+      for (let i = 0; i < 4; i++) {
+        const x = (rnd() * (SIZE - 2)) | 0;
+        const y = (rnd() * (SIZE - 2)) | 0;
+        px.rect(x, y, 2, 2, '#77d66a');
+      }
+    },
+  },
+  bark: {
+    paint(px, rnd) {
+      px.rect(0, 0, SIZE, SIZE, '#8a5a34');
+      for (let x = 1; x < SIZE; x += 5) px.rect(x, 0, 1, SIZE, '#6b4224');
+      speckle(px, rnd, 12, '#a3714a');
+      speckle(px, rnd, 8, '#5a361c');
+    },
+  },
   water: {
     paint(px, rnd) {
       px.rect(0, 0, SIZE, SIZE, '#4aa3e8');
@@ -78,6 +125,7 @@ export function getTileTexture(name) {
   const px = new PixelBuffer(SIZE, SIZE);
   surface.paint(px, seededRandom(hashString(name)));
   const tex = px.toTexture();
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; // so animated offsets tile instead of smearing
   cache.set(name, tex);
   return tex;
 }

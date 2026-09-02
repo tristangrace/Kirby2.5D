@@ -6,18 +6,24 @@
  * keys or buttons, so adding a device means editing this file alone.
  * Call `update()` once at the start of each frame (polls gamepads) and
  * `endFrame()` at the end (clears just-pressed state).
+ *
+ * Actions follow the Game Boy layout: `jump` is A, `action` (inhale / spit /
+ * exhale) is B.
  */
 export const DEFAULT_BINDINGS = {
   left: ['ArrowLeft', 'KeyA'],
   right: ['ArrowRight', 'KeyD'],
   up: ['ArrowUp', 'KeyW'],
   down: ['ArrowDown', 'KeyS'],
-  action: ['Space', 'KeyJ'],
+  jump: ['Space', 'KeyK', 'KeyZ'],
+  action: ['KeyJ', 'KeyX', 'ShiftLeft', 'ShiftRight'],
 };
 
 /** Standard-mapping gamepad button indices -> actions. */
 export const GAMEPAD_BUTTONS = {
-  0: 'action', // A / Cross / B(Switch)
+  0: 'jump', // A / Cross / B(Switch)
+  1: 'action', // B / Circle / A(Switch)
+  2: 'action', // X / Square / Y(Switch)
   12: 'up',
   13: 'down',
   14: 'left',
@@ -46,6 +52,7 @@ export class Input {
       const action = this._keyToAction.get(e.code);
       if (!action) return;
       e.preventDefault();
+      if (e.repeat) return;
       this.lastSource = 'keyboard';
       this._press(this._keyDown, action);
     };
@@ -98,18 +105,19 @@ export class Input {
       this.lastSource = 'gamepad';
     }
 
+    // Several buttons can map to one action, so collect what is held first.
+    const held = new Set();
     for (const [index, action] of Object.entries(GAMEPAD_BUTTONS)) {
       const btn = pad.buttons[index];
-      const down = !!btn && (btn.pressed || btn.value > 0.5);
-      if (down) {
-        if (!this._padDown.has(action)) {
-          this.lastSource = 'gamepad';
-          this._press(this._padDown, action);
-        }
-      } else {
-        this._padDown.delete(action);
+      if (btn && (btn.pressed || btn.value > 0.5)) held.add(action);
+    }
+    for (const action of held) {
+      if (!this._padDown.has(action)) {
+        this.lastSource = 'gamepad';
+        this._press(this._padDown, action);
       }
     }
+    for (const action of [...this._padDown]) if (!held.has(action)) this._padDown.delete(action);
   }
 
   /** Touch overlay hook: hold/release a named action. */

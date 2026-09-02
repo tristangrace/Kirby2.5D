@@ -1,4 +1,5 @@
 import hello from './hello.js';
+import greenGreens from './greenGreens.js';
 
 /** Level registry. Import a new level's data and register it here. */
 const levels = new Map();
@@ -18,3 +19,4 @@ export function listLevels() {
 }
 
 registerLevel(hello);
+registerLevel(greenGreens);

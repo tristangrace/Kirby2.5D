@@ -1,7 +1,8 @@
 /**
  * On-screen controls for touch devices (iPad etc.): a floating joystick that
- * appears wherever the left side of the screen is touched, plus an action
- * button on the right. Feeds Input.touchAxis / Input.setVirtualButton.
+ * appears wherever the left side of the screen is touched, plus Game Boy
+ * style A (jump) and B (inhale) buttons on the right. Feeds
+ * Input.touchAxis / Input.setVirtualButton.
  *
  * Only mounts itself on coarse-pointer devices unless `force` is set.
  */
@@ -16,12 +17,13 @@ export class TouchControls {
     this.root.id = 'touch-controls';
     this.root.innerHTML =
       '<div class="stick"><div class="knob"></div></div>' +
-      '<button class="action-btn" aria-label="Action">A</button>';
+      '<button class="btn btn-b" data-action="action" aria-label="Inhale">B</button>' +
+      '<button class="btn btn-a" data-action="jump" aria-label="Jump">A</button>';
     container.appendChild(this.root);
 
     this.stick = this.root.querySelector('.stick');
     this.knob = this.root.querySelector('.knob');
-    this.button = this.root.querySelector('.action-btn');
+    this.buttons = [...this.root.querySelectorAll('.btn')];
     this.stickPointer = null;
     this.origin = { x: 0, y: 0 };
 
@@ -33,18 +35,21 @@ export class TouchControls {
     window.addEventListener('pointerup', this._onUp);
     window.addEventListener('pointercancel', this._onUp);
 
-    const press = (down) => (e) => {
-      e.preventDefault();
-      input.setVirtualButton('action', down);
-    };
-    this.button.addEventListener('pointerdown', press(true));
-    this.button.addEventListener('pointerup', press(false));
-    this.button.addEventListener('pointercancel', press(false));
-    this.button.addEventListener('pointerleave', press(false));
+    for (const button of this.buttons) {
+      const action = button.dataset.action;
+      const press = (down) => (e) => {
+        e.preventDefault();
+        input.setVirtualButton(action, down);
+      };
+      button.addEventListener('pointerdown', press(true));
+      button.addEventListener('pointerup', press(false));
+      button.addEventListener('pointercancel', press(false));
+      button.addEventListener('pointerleave', press(false));
+    }
   }
 
   _pointerDown(e) {
-    if (e.target === this.button || this.stickPointer !== null) return;
+    if (this.buttons.includes(e.target) || this.stickPointer !== null) return;
     if (e.clientX > window.innerWidth * 0.6) return; // right side reserved for buttons
     e.preventDefault();
     this.stickPointer = e.pointerId;

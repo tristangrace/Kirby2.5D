@@ -1,9 +1,11 @@
 import { Game } from './Game.js';
 import { TouchControls } from './core/TouchControls.js';
+import { Hud } from './ui/Hud.js';
 
 const container = document.getElementById('game');
 const game = new Game(container);
-game.loadLevel('hello');
+const hud = new Hud(game);
+game.loadLevel('greenGreens');
 game.start();
 
 // On-screen joystick for iPad and other touch devices (no-op elsewhere).
@@ -11,9 +13,9 @@ const touch = new TouchControls(document.body, game.input);
 
 // Controls hint follows whichever device was used last.
 const HINTS = {
-  keyboard: 'WASD / Arrows: walk',
-  gamepad: 'Left stick / D-pad: walk',
-  touch: 'Drag left side of screen: walk',
+  keyboard: 'WASD: walk · K / Space: jump, again to fly · J: inhale, spit, exhale',
+  gamepad: 'Stick: walk · A: jump, again to fly · B / X: inhale, spit, exhale',
+  touch: 'Drag left side: walk · A: jump, again to fly · B: inhale, spit, exhale',
 };
 const hint = document.getElementById('hint');
 setInterval(() => {
@@ -37,4 +39,5 @@ if (!document.fullscreenEnabled && !document.webkitFullscreenEnabled) fsButton.h
 if (import.meta.env.DEV) {
   window.__game = game;
   window.__touch = touch;
+  window.__hud = hud;
 }

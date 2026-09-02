@@ -9,8 +9,11 @@ import { createEntity } from './entities/index.js';
 
 /**
  * Top-level composition: engine + camera + input + the current level and its
- * entities. Systems added later (enemies, abilities, HUD, audio) should hang
- * off this object and talk through `events` rather than to each other.
+ * entities. Systems added later (abilities, HUD, audio) should hang off this
+ * object and talk through `events` rather than to each other.
+ *
+ * Events emitted here: level:loaded, level:unloaded, entity:spawned, frame.
+ * Entities emit their own (player:hp, enemy:defeated, boss:hp, ...).
  */
 export class Game {
   constructor(container, { pixelScale = 'auto', pixelsPerUnit = 24 } = {}) {
@@ -44,6 +47,7 @@ export class Game {
     this.level = new Level(data);
     this.level.build(this.scene);
 
+    // The player spawns first so it updates before everything that reacts to it.
     this.player = this.spawn('player', this.level.spawnPoint());
     for (const e of data.entities ?? []) {
       this.spawn(e.type, { ...e, x: e.col + 0.5, z: e.row + 0.5 });
@@ -51,7 +55,7 @@ export class Game {
 
     this.iso.focus.copy(this.player.position);
     this.iso.snapToFocus();
-    this.events.emit('level:loaded', { id, level: this.level });
+    this.events.emit('level:loaded', { id, level: this.level, name: data.name });
   }
 
   unloadLevel() {
@@ -75,7 +79,9 @@ export class Game {
 
   update(dt, elapsed) {
     this.input.update();
-    for (const e of this.entities) if (e.alive) e.update(dt);
+    // Iterate a snapshot: entities spawned mid-frame start updating next frame.
+    const current = this.entities.slice();
+    for (const e of current) if (e.alive) e.update(dt);
 
     if (this.entities.some((e) => !e.alive)) {
       for (const e of this.entities) if (!e.alive) e.onDespawn(this.scene);
@@ -87,6 +93,7 @@ export class Game {
     this.level?.update(dt, elapsed);
 
     this.engine.render(this.scene, this.iso.camera);
+    this.events.emit('frame', dt);
     this.input.endFrame();
   }
 

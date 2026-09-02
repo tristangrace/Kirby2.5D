@@ -15,11 +15,21 @@ Open http://localhost:5190.
 
 ## Controls
 
-| Device | Walk | Action (reserved) |
-| --- | --- | --- |
-| Keyboard | WASD / arrow keys | Space / J |
-| Gamepad (Xbox, PlayStation, Switch Pro, MFi) | left stick / d-pad | A / Cross |
-| Touch (iPad) | drag anywhere on the left side | red A button |
+Game Boy layout: A jumps, B inhales.
+
+| Device | Walk | A: jump / fly | B: inhale / spit / exhale |
+| --- | --- | --- | --- |
+| Keyboard | WASD / arrow keys | K, Z or Space | J, X or Shift |
+| Gamepad (Xbox, PlayStation, Switch Pro, MFi) | left stick / d-pad | A / Cross | B / X (Circle / Square) |
+| Touch (iPad) | drag anywhere on the left side | red A button | blue B button |
+
+- Press A on the ground to jump. Press A again in the air and Kirby puffs up
+  and floats; every further A press flaps him higher. He can fly over water,
+  hedges and up onto stone blocks and tree tops.
+- Hold B to inhale. Anything in front of his mouth gets pulled in; press B
+  again to spit it out as a star. Stars (and air puffs, from pressing B while
+  floating) hurt enemies.
+- Landing in water costs a heart and puts him back on the last dry ground.
 
 The fullscreen button sits top-right. On an iPad, Share > Add to Home Screen
 installs it as a full-screen app.
@@ -43,33 +53,57 @@ Builds `dist/` and pushes it to the `gh-pages` branch, which GitHub Pages
 serves at https://tristangrace.github.io/Kirby2.5D/. Commit and push `main`
 separately for the source.
 
+## Green Greens
+
+The first level runs west to east: the starting meadow, a plank bridge over
+the river, a plateau with a staircase hill (Maxim Tomato on top) and a hedge
+maze, a second river crossed by hopping ledges or flying, and the forest where
+Whispy Woods waits inside a hedge ring. He blows air puffs and shakes apples
+loose; inhale an apple (or anything else) and spit it back at him.
+
+Enemies: Waddle Dee (wanders), Waddle Doo (whips a beam when you get close),
+Bronto Burt (flies at you), Cappy (a mushroom that chases). All of them can
+be inhaled.
+
 ## Layout
 
 ```
 src/
-  main.js                 bootstrap: new Game, load level, start loop
+  main.js                 bootstrap: new Game, HUD, load level, start loop
   Game.js                 composition root; owns engine/camera/input/level/entities
   core/
     Engine.js             renderer, low-res pixel canvas, frame loop
     Input.js              keyboard + gamepad + touch -> named actions and a movement axis
-    TouchControls.js      on-screen joystick / button overlay for touch devices
+    TouchControls.js      on-screen joystick / A / B overlay for touch devices
     EventBus.js           pub/sub so systems don't import each other
   gfx/
     IsoCamera.js          orthographic iso camera, pixel snapping, basis vectors
-    PixelArt.js           PixelBuffer (ellipse/outline/flip) + texture helpers
-    Textures.js           procedural tile surfaces (grass, dirt, water...)
-    sprites/KirbySprite.js  Kirby frames + sprite sheet
+    PixelArt.js           PixelBuffer (ellipse/polygon/star/outline/flip) + texture helpers
+    Textures.js           procedural tile surfaces (grass, dirt, water, leaf, bark...)
+    sprites/sheet.js      sprite sheet builder shared by every character
+    sprites/KirbySprite.js  Kirby poses: walk, jump, float, inhale, full, hurt...
+    sprites/EnemySprites.js Waddle Dee, Waddle Doo, Bronto Burt, Cappy
+    sprites/WhispySprite.js Whispy Woods
+    sprites/FxSprites.js    star, puff, spark, apple, tomato, poof, splash, hit
   world/
-    Tiles.js              tile type registry (surfaces, height, walkable)
+    Tiles.js              tile type registry (surfaces, height, walkable, liquid)
     Level.js              LevelData -> instanced meshes + collision queries
     levels/index.js       level registry
-    levels/hello.js       the starter island
+    levels/greenGreens.js the first level
+    levels/hello.js       the original starter island
   entities/
-    Entity.js             base lifecycle: onSpawn / update / onDespawn
-    SpriteEntity.js       camera-facing pixel billboard + shadow + animation
-    Player.js             Kirby: input, collision, animation state
+    Entity.js             base lifecycle + cylinder hitbox + team
+    SpriteEntity.js       camera-facing pixel billboard, shadow, animation, terrain movement
+    Player.js             Kirby: jump / float / inhale / spit / hurt / respawn
+    Enemy.js              base enemy: inhaled, hurt, die, wander / chase helpers
+    enemies/              WaddleDee, WaddleDoo, BrontoBurt, Cappy, Apple, WhispyWoods
+    items/MaximTomato.js  full heal pickup
+    Projectile.js         star, air puff, beam spark, falling apple
+    Effect.js             one-shot animated billboards (poof, splash, hit, sparkle)
     registry.js           type string -> class
     index.js              registers built-in entity types
+  ui/
+    Hud.js                hearts, lives, mouthful, boss bar, banner (DOM)
 ```
 
 ## How the 2.5D works
@@ -93,12 +127,13 @@ the `rows` strings and `legend`, then `registerLevel()` it in
 **Add a tile type:** `registerTile('lava', { top: 'lava', side: 'stone', height: -0.2, walkable: false })`
 in `world/Tiles.js`, and paint the `lava` surface in `gfx/Textures.js`.
 
-**Add a monster:** subclass `SpriteEntity` (or `Entity`), set `static type = 'waddleDee'`,
-build its frames with `PixelBuffer` the way `KirbySprite.js` does, and
-`registerEntity(WaddleDee)` in `entities/index.js`. Then list it in a level's
-`entities: [{ type: 'waddleDee', col, row }]` and the level loader spawns it.
+**Add a monster:** subclass `Enemy`, set `static type = 'myEnemy'`, build a
+sheet with `buildSheet` the way `EnemySprites.js` does, implement `behave(dt)`
+(helpers: `wander`, `chase`, `stickToGround`, `dirToPlayer`) and register it
+in `entities/index.js`. Then list it in a level's
+`entities: [{ type: 'myEnemy', col, row }]` and the level loader spawns it.
 Use `game.events` (`emit` / `on`) for hits, pickups, and other cross-system
 messages.
 
-**Add an input action:** extend `DEFAULT_BINDINGS` in `core/Input.js` and
-query it with `input.isDown('action')` / `input.justPressed('action')`.
+**Add an input action:** extend `DEFAULT_BINDINGS` (and `GAMEPAD_BUTTONS`) in
+`core/Input.js` and query it with `input.isDown('jump')` / `input.justPressed('jump')`.

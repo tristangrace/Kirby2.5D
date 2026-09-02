@@ -41,6 +41,67 @@ export class PixelBuffer {
     return mask;
   }
 
+  /** Boolean mask of pixels whose centre lies inside a polygon ([x, y] pairs, any winding). */
+  polygonMask(points) {
+    const mask = new Uint8Array(this.width * this.height);
+    const n = points.length;
+    for (let y = 0; y < this.height; y++) {
+      const py = y + 0.5;
+      for (let x = 0; x < this.width; x++) {
+        const px = x + 0.5;
+        let inside = false;
+        for (let i = 0, j = n - 1; i < n; j = i++) {
+          const [xi, yi] = points[i];
+          const [xj, yj] = points[j];
+          if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+        }
+        if (inside) mask[y * this.width + x] = 1;
+      }
+    }
+    return mask;
+  }
+
+  /** Filled + outlined polygon. Returns the fill mask. */
+  polygon(points, fill, outline) {
+    const mask = this.polygonMask(points);
+    this.fillMask(mask, fill);
+    if (outline) this.outlineMask(mask, outline);
+    return mask;
+  }
+
+  /** Five-pointed star centred on (cx, cy). `angle` rotates it (radians). */
+  star(cx, cy, outer, inner, fill, outline, angle = -Math.PI / 2) {
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 === 0 ? outer : inner;
+      const a = angle + (i * Math.PI) / 5;
+      pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+    }
+    return this.polygon(pts, fill, outline);
+  }
+
+  /** 1px Bresenham line. */
+  line(x0, y0, x1, y1, color) {
+    let dx = Math.abs(x1 - x0);
+    let dy = -Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1;
+    const sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    for (;;) {
+      this.set(x0, y0, color);
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 >= dy) {
+        err += dy;
+        x0 += sx;
+      }
+      if (e2 <= dx) {
+        err += dx;
+        y0 += sy;
+      }
+    }
+  }
+
   fillMask(mask, color) {
     for (let i = 0; i < mask.length; i++) if (mask[i]) this.px[i] = color;
   }
