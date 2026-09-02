@@ -1,18 +1,17 @@
 import * as THREE from 'three';
 import { SpriteEntity } from './SpriteEntity.js';
-import { getStarSheet, getPuffSheet, getSparkSheet, getAppleSheet } from '../gfx/sprites/FxSprites.js';
-
-const _dir = new THREE.Vector3();
+import { getStarSheet, getPuffSheet, getSparkSheet, getAppleSheet, getSlashSheet, getFlameSheet } from '../gfx/sprites/FxSprites.js';
 
 /**
- * Something thrown or blown: a spat star, Kirby's air puff, a Waddle Doo beam
- * spark, or an apple shaken loose by Whispy Woods. Hurts whatever it touches
- * on the other team, then disappears.
+ * Something thrown, blown or swung: a spat star, Kirby's air puff, a beam
+ * spark, an apple shaken loose by Whispy Woods, a sword slash, a flame.
+ * Hurts whatever it touches on the other team, then disappears (or keeps
+ * going, if it `pierce`s).
  */
 export class Projectile extends SpriteEntity {
   static type = 'projectile';
 
-  constructor(game, { kind = 'star', team = 'player', vx = 0, vy = 0, vz = 0, y = null, damage = 1, life = 1, gravity = 0, hitEffect = 'hit', ...opts } = {}) {
+  constructor(game, { kind = 'star', team = 'player', vx = 0, vy = 0, vz = 0, y = null, damage = 1, life = 1, gravity = 0, hitEffect = 'hit', pierce = false, tint = null, ...opts } = {}) {
     super(game, opts, Projectile.sheetFor(kind));
     this.kind = kind;
     this.team = team;
@@ -21,11 +20,14 @@ export class Projectile extends SpriteEntity {
     this.life = life;
     this.gravity = gravity;
     this.hitEffect = hitEffect;
+    this.pierce = pierce;
+    this.hit = pierce ? new Set() : null;
     this.airborne = true;
-    this.radius = kind === 'spark' ? 0.2 : 0.28;
-    this.height = 0.5;
+    this.radius = kind === 'spark' ? 0.2 : kind === 'slash' ? 0.45 : 0.28;
+    this.height = kind === 'slash' ? 0.9 : 0.5;
     if (y != null) this.position.y = y;
     this.shadow.visible = kind === 'apple';
+    if (tint) this.material.color.set(tint);
     this.faceToward(vx, vz);
   }
 
@@ -34,11 +36,16 @@ export class Projectile extends SpriteEntity {
       case 'star':
         return getStarSheet();
       case 'puff':
+      case 'ice':
         return getPuffSheet();
       case 'spark':
         return getSparkSheet();
       case 'apple':
         return getAppleSheet();
+      case 'slash':
+        return getSlashSheet();
+      case 'flame':
+        return getFlameSheet();
       default:
         throw new Error('Unknown projectile: ' + kind);
     }
@@ -67,17 +74,26 @@ export class Projectile extends SpriteEntity {
     for (const e of this.game.entities) {
       if (!e.alive || e === this || e.team === this.team || e.team === 'neutral' || e.solid === false) continue;
       if (!e.hurt || !this.overlaps(e)) continue;
-      if (e.hurt(this.damage, this) !== false) return this.impact();
+      if (this.hit) {
+        if (this.hit.has(e)) continue;
+        this.hit.add(e);
+      }
+      if (e.hurt(this.damage, this) !== false) {
+        if (!this.pierce) return this.impact();
+        if (this.hitEffect) this.spawnHit();
+      }
     }
 
     super.update(dt);
   }
 
+  spawnHit() {
+    this.game.spawn('effect', { kind: this.hitEffect, x: this.position.x, y: this.position.y + 0.1, z: this.position.z });
+  }
+
   /** Stop and show a hit spark. */
   impact() {
-    if (this.hitEffect) {
-      this.game.spawn('effect', { kind: this.hitEffect, x: this.position.x, y: this.position.y + 0.1, z: this.position.z });
-    }
+    if (this.hitEffect) this.spawnHit();
     this.destroy();
   }
 

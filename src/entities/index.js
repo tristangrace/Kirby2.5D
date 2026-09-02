@@ -9,9 +9,11 @@ import { Cappy } from './enemies/Cappy.js';
 import { Apple } from './enemies/Apple.js';
 import { WhispyWoods } from './enemies/WhispyWoods.js';
 import { MaximTomato } from './items/MaximTomato.js';
+import { PointStar } from './items/PointStar.js';
+import { ShopStall } from './ShopStall.js';
 
 // Built-in entity types. Level data spawns these by their static `type`.
-for (const E of [Player, Effect, Projectile, WaddleDee, WaddleDoo, BrontoBurt, Cappy, Apple, WhispyWoods, MaximTomato]) {
+for (const E of [Player, Effect, Projectile, WaddleDee, WaddleDoo, BrontoBurt, Cappy, Apple, WhispyWoods, MaximTomato, PointStar, ShopStall]) {
   registerEntity(E);
 }
 

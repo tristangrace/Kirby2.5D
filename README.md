@@ -64,6 +64,16 @@ logotype) are copied verbatim, with the theme CSS trimmed to what this game
 uses in `src/ui/theme.js`. The title (`src/ui/Title.js`) pauses the world,
 drifts stars over a dusk scrim and starts on any button, Enter, Start or a tap.
 
+## Shop and abilities
+
+Defeated enemies pop out point stars (Whispy drops a pile), and more lie
+around the level. Walk up to a market stall and press B to open the shop,
+which sells copy abilities using the 3D game's ability icons: Sword (30),
+Beam (25), Fire (40), Ice (35) and Spark (30). An equipped ability replaces
+inhaling on B: Sword and Beam are single presses, Fire, Ice and Spark fire
+while B is held and root Kirby in place. Pick "Normal" to go back to
+inhaling. Stars and purchases are saved in localStorage.
+
 ## Green Greens
 
 The first level runs west to east: the starting meadow, a plank bridge over
@@ -83,6 +93,7 @@ src/
   main.js                 bootstrap: new Game, HUD, load level, start loop
   Game.js                 composition root; owns engine/camera/input/level/entities
   core/
+    Save.js               localStorage for stars and bought abilities
     Engine.js             renderer, low-res pixel canvas, frame loop
     Input.js              keyboard + gamepad + touch -> named actions and a movement axis
     TouchControls.js      on-screen joystick / A / B overlay for touch devices
@@ -109,6 +120,8 @@ src/
     Enemy.js              base enemy: inhaled, hurt, die, wander / chase helpers
     enemies/              WaddleDee, WaddleDoo, BrontoBurt, Cappy, Apple, WhispyWoods
     items/MaximTomato.js  full heal pickup
+    items/PointStar.js    currency pickup (popped out of enemies)
+    ShopStall.js          market stall; B nearby opens the shop
     Projectile.js         star, air puff, beam spark, falling apple
     Effect.js             one-shot animated billboards (poof, splash, hit, sparkle)
     registry.js           type string -> class
@@ -116,6 +129,7 @@ src/
   ui/
     Hud.js                hearts, lives, mouthful, boss bar, banner (DOM, icon SVGs)
     Title.js              splash screen: logo, stars, Press Start, white wipe
+    Shop.js               ability shop card: browse, buy, equip
     icons.js, logo.js     inline SVG icon set and logotype (from ../Kirby)
     theme.js, fonts.js    UI stylesheet and font stack
 ```

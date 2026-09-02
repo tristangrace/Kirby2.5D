@@ -71,6 +71,51 @@ const CSS = `
 .kb-banner{position:absolute; left:0; right:0; top:34%; text-align:center;
   font-size:calc(var(--kb-u)*3.4); line-height:1.05; color:#ffd964; text-transform:uppercase;}
 
+/* ---------- Shop ---------- */
+.kb-shop{position:absolute; inset:0; pointer-events:auto;}
+.kb-shop-scrim{position:absolute; inset:0; background:radial-gradient(ellipse at 50% 42%, rgba(38,26,84,.55), rgba(6,5,22,.9));}
+.kb-card{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:calc(var(--kb-u)*.6);
+  width:min(92vw, calc(var(--kb-u)*34)); max-height:92vh;
+  padding:calc(var(--kb-u)*2.2) calc(var(--kb-u)*1.4) calc(var(--kb-u)*1.2);
+  border-radius:calc(var(--kb-u)*1.9); background:var(--kb-body);
+  border:var(--kb-rim-w) solid var(--kb-rim); box-shadow:var(--kb-drop);}
+.kb-card-title{position:absolute; top:calc(var(--kb-u)*-1.1); left:50%; transform:translateX(-50%);
+  padding:calc(var(--kb-u)*.4) calc(var(--kb-u)*1.8); border-radius:999px; white-space:nowrap;
+  font-size:calc(var(--kb-u)*1.25); text-transform:uppercase; color:#fff3c4;
+  background:linear-gradient(180deg,#ff8ab5,#ec2f7c); border:var(--kb-rim-w) solid var(--kb-rim); box-shadow:var(--kb-drop);}
+.kb-shop-head{display:flex; align-items:center; gap:calc(var(--kb-u)*.4); align-self:flex-end;}
+.kb-shop-star{width:calc(var(--kb-u)*1.8); height:calc(var(--kb-u)*1.8);}
+.kb-shop-wallet{font-size:calc(var(--kb-u)*1.4); color:#fff3c4;}
+.kb-shop-list{display:flex; flex-direction:column; gap:calc(var(--kb-u)*.35); width:100%; overflow:auto;}
+.kb-row{display:flex; align-items:center; gap:calc(var(--kb-u)*.7); width:100%;
+  padding:calc(var(--kb-u)*.35) calc(var(--kb-u)*.8) calc(var(--kb-u)*.35) calc(var(--kb-u)*.5);
+  border-radius:calc(var(--kb-u)*1.4); background:rgba(8,6,26,.35); border:var(--kb-key-w) solid transparent;}
+.kb-row.is-sel{background:linear-gradient(180deg, rgba(255,214,120,.28), rgba(255,180,80,.18)); border-color:var(--kb-rim);}
+.kb-row-cursor{width:calc(var(--kb-u)*1.3); height:calc(var(--kb-u)*1.3); flex:none; opacity:0;}
+.kb-row.is-sel .kb-row-cursor{opacity:1;}
+.kb-abil{width:calc(var(--kb-u)*3); height:calc(var(--kb-u)*3); flex:none; border-radius:50%; padding:calc(var(--kb-u)*.35);
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.28), rgba(255,255,255,0) 60%), rgba(8,6,26,.6);
+  box-shadow:0 0 0 var(--kb-key-w) rgba(18,14,48,.9);}
+.kb-row-text{display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;}
+.kb-row-label{font-size:calc(var(--kb-u)*1.2); color:#fff;}
+.kb-row-blurb{font-size:calc(var(--kb-u)*.85); font-weight:700; color:#d9d4ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.kb-row-price{font-size:calc(var(--kb-u)*1.05); color:#ffd964; white-space:nowrap;}
+.kb-row-price.is-poor{color:#ff7a8f;}
+.kb-row.is-equipped .kb-row-price{color:#5fe07a;}
+.kb-shop-foot{display:flex; align-items:center; gap:calc(var(--kb-u)*.5); font-size:calc(var(--kb-u)*.9); color:#d9d4ff; text-transform:uppercase;}
+.kb-foot-btn{width:calc(var(--kb-u)*1.6); height:calc(var(--kb-u)*1.6); margin-left:calc(var(--kb-u)*.6);}
+.kb-shop-msg{min-height:1.3em; font-size:calc(var(--kb-u)*.95); color:#fff3c4;}
+
+.kb-prompt{position:absolute; left:50%; bottom:max(20px, env(safe-area-inset-bottom)); transform:translateX(-50%);
+  font-size:calc(var(--kb-u)*1.05); text-transform:uppercase; color:#fff3c4;}
+.kb-prompt-btn{width:calc(var(--kb-u)*1.7); height:calc(var(--kb-u)*1.7);}
+.kb-stars-ico{width:calc(var(--kb-u)*1.8); height:calc(var(--kb-u)*1.8); flex:none;}
+.kb-stars-n{font-size:calc(var(--kb-u)*1.3); line-height:1; color:#fff3c4;}
+.kb-abil-hud{width:calc(var(--kb-u)*2.4); height:calc(var(--kb-u)*2.4); flex:none; border-radius:50%; padding:calc(var(--kb-u)*.25);
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.28), rgba(255,255,255,0) 60%), rgba(8,6,26,.6);}
+.kb-abil-name{font-size:calc(var(--kb-u)*1.05); text-transform:uppercase; color:#fff3c4;}
+
 /* ---------- Title screen ---------- */
 .kb-title{position:absolute; inset:0; pointer-events:auto; cursor:pointer;}
 .kb-title[hidden]{display:none;}

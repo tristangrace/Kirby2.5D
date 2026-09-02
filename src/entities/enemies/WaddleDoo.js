@@ -15,6 +15,7 @@ export class WaddleDoo extends Enemy {
   constructor(game, opts) {
     super(game, opts, getWaddleDooSheet());
     this.hp = 2;
+    this.starDrop = 2;
     this.speed = 1.2;
     this.state = 'wander';
     this.stateTimer = 0;

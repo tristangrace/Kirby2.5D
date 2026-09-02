@@ -8,6 +8,7 @@ export class Cappy extends Enemy {
   constructor(game, opts) {
     super(game, opts, getCappySheet());
     this.hp = 2;
+    this.starDrop = 2;
     this.speed = 0.9;
     this.radius = 0.36;
     this.height = 1.0;

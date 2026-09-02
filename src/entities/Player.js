@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SpriteEntity } from './SpriteEntity.js';
 import { getKirbySpriteSheet } from '../gfx/sprites/KirbySprite.js';
+import { Save } from '../core/Save.js';
 
 const _move = new THREE.Vector3();
 const _dir = new THREE.Vector3();
@@ -14,6 +15,15 @@ const MAX_FALL = 12;
 const MAX_ALTITUDE = 6.5; // above the ground under him
 const INHALE_RANGE = 2.7;
 const INHALE_CONE = 0.45; // cosine of the half-angle in front of his mouth
+
+/** Copy abilities sold in the shop. `hold` abilities fire while B is held and root Kirby. */
+export const ABILITIES = {
+  sword: { label: 'Sword', price: 30, hold: false, blurb: 'Swing a blade. Hits everything in front.' },
+  beam: { label: 'Beam', price: 25, hold: false, blurb: 'Whip a crackling arc of sparks.' },
+  fire: { label: 'Fire', price: 40, hold: true, blurb: 'Breathe fire while B is held.' },
+  ice: { label: 'Ice', price: 35, hold: true, blurb: 'Freezing breath that passes through foes.' },
+  spark: { label: 'Spark', price: 30, hold: true, blurb: 'Crackle with sparks all around you.' },
+};
 
 /**
  * Kirby.
@@ -62,6 +72,43 @@ export class Player extends SpriteEntity {
     this.facingDir(this.aim);
     this.lastSafe = this.position.clone();
     this.spawnPos = this.position.clone();
+
+    // Shop: point stars and copy abilities, kept between visits.
+    const saved = Save.load();
+    this.stars = saved.stars ?? 0;
+    this.owned = new Set(saved.owned ?? []);
+    this.ability = saved.ability && this.owned.has(saved.ability) ? saved.ability : null;
+    this.abilityTimer = 0;
+    this.attacking = false;
+    this.nearShop = null;
+  }
+
+  // ---------------------------------------------------------------- shop
+
+  addStars(n) {
+    this.stars += n;
+    this.game.events.emit('player:stars', this.stars);
+    this.persist();
+  }
+
+  /** Buy (if needed) and equip an ability; null equips nothing. Returns false if unaffordable. */
+  equip(name) {
+    if (name && !this.owned.has(name)) {
+      const price = ABILITIES[name]?.price ?? Infinity;
+      if (this.stars < price) return false;
+      this.stars -= price;
+      this.owned.add(name);
+      this.game.events.emit('player:stars', this.stars);
+    }
+    this.ability = name;
+    this.attacking = false;
+    this.game.events.emit('player:ability', name);
+    this.persist();
+    return true;
+  }
+
+  persist() {
+    Save.save({ stars: this.stars, owned: [...this.owned], ability: this.ability });
   }
 
   // ---------------------------------------------------------------- frame
@@ -110,8 +157,29 @@ export class Player extends SpriteEntity {
     const axis = input.axis();
     const moving = axis.x !== 0 || axis.y !== 0;
 
-    // B: inhale (hold) / spit / exhale.
-    if (this.inhaling) {
+    // Shops: B at a stall opens the menu instead of anything else.
+    this.nearShop = null;
+    if (this.grounded && !this.full) {
+      for (const e of this.game.entities) {
+        if (e.isShop && e.alive && this.distanceXZ(e) < 1.4) {
+          this.nearShop = e;
+          break;
+        }
+      }
+    }
+    if (this.nearShop && input.justPressed('action')) {
+      this.inhaling = false;
+      this.attacking = false;
+      this.game.events.emit('shop:open', this.nearShop);
+      return;
+    }
+
+    // B: copy ability if he has one, else inhale (hold) / spit / exhale.
+    this.attacking = false;
+    if (this.ability && !this.flying && !this.full) {
+      this.inhaling = false;
+      this.useAbility(dt);
+    } else if (this.inhaling) {
       if (!input.isDown('action') || this.flying || this.full) this.inhaling = false;
     } else if (input.justPressed('action')) {
       if (this.flying) this.exhale();
@@ -121,7 +189,7 @@ export class Player extends SpriteEntity {
 
     // Walk. Inhaling roots him; a mouthful or a puffed body slows him.
     let speed = this.speed;
-    if (this.inhaling) speed = 0;
+    if (this.inhaling || this.attacking) speed = 0;
     else if (this.full) speed = 3.0;
     else if (this.flying) speed = 3.4;
     this.walking = moving && speed > 0;
@@ -141,7 +209,7 @@ export class Player extends SpriteEntity {
       } else if (this.flying) {
         this.vy = Math.max(this.vy, 0) * 0.3 + FLAP_SPEED;
         this.playOneShot('flap');
-      } else if (!this.full && !this.inhaling) {
+      } else if (!this.full && !this.inhaling && !this.attacking) {
         this.flying = true;
         this.vy = FLAP_SPEED;
         this.playOneShot('flap');
@@ -212,6 +280,60 @@ export class Player extends SpriteEntity {
         this.hurt(e.contactDamage, e);
         break;
       }
+    }
+  }
+
+  // ---------------------------------------------------------------- abilities
+
+  useAbility(dt) {
+    const input = this.game.input;
+    const def = ABILITIES[this.ability];
+    this.abilityTimer -= dt;
+    if (!def) return;
+    const m = this.mouthPoint(); // leaves the aim direction in _dir
+    const spawn = (opts) => this.game.spawn('projectile', { team: 'player', ...opts });
+
+    if (!def.hold) {
+      if (!input.justPressed('action') || this.abilityTimer > 0) return;
+      this.playOneShot('spit');
+      if (this.ability === 'sword') {
+        this.abilityTimer = 0.32;
+        spawn({ kind: 'slash', x: this.position.x + _dir.x * 0.8, y: this.position.y + 0.35, z: this.position.z + _dir.z * 0.8, life: 0.16, damage: 2, pierce: true });
+      } else if (this.ability === 'beam') {
+        this.abilityTimer = 0.5;
+        for (let i = 0; i < 8; i++) {
+          const angle = (1 - i / 7) * 1.4;
+          const r = 1.45;
+          spawn({
+            kind: 'spark',
+            x: this.position.x + _dir.x * Math.cos(angle) * r,
+            y: this.position.y + 0.4 + Math.sin(angle) * r,
+            z: this.position.z + _dir.z * Math.cos(angle) * r,
+            life: 0.12 + i * 0.03,
+            damage: 1,
+            hitEffect: null,
+          });
+        }
+      }
+      return;
+    }
+
+    if (!input.isDown('action')) return;
+    this.attacking = true;
+    if (this.abilityTimer > 0) return;
+    if (this.ability === 'fire') {
+      this.abilityTimer = 0.07;
+      const spread = (Math.random() - 0.5) * 1.6;
+      spawn({ kind: 'flame', x: m.x, y: m.y, z: m.z, vx: _dir.x * 5.5 - _dir.z * spread, vz: _dir.z * 5.5 + _dir.x * spread, vy: 0.6, life: 0.34, damage: 1, hitEffect: null });
+    } else if (this.ability === 'ice') {
+      this.abilityTimer = 0.09;
+      const spread = (Math.random() - 0.5) * 1.2;
+      spawn({ kind: 'ice', tint: '#9ad9ff', x: m.x, y: m.y, z: m.z, vx: _dir.x * 4.2 - _dir.z * spread, vz: _dir.z * 4.2 + _dir.x * spread, life: 0.45, damage: 1, pierce: true, hitEffect: null });
+    } else if (this.ability === 'spark') {
+      this.abilityTimer = 0.05;
+      const a = Math.random() * Math.PI * 2;
+      const r = 0.5 + Math.random() * 0.7;
+      spawn({ kind: 'spark', x: this.position.x + Math.cos(a) * r, y: this.position.y + 0.1 + Math.random() * 0.8, z: this.position.z + Math.sin(a) * r, life: 0.12, damage: 1, hitEffect: null });
     }
   }
 
@@ -398,6 +520,7 @@ export class Player extends SpriteEntity {
     if (this.state === 'dead' || this.state === 'hurt') return 'hurt';
     if (this.state === 'victory') return 'victory';
     if (this.oneShot) return this.oneShot;
+    if (this.attacking) return this.ability === 'spark' ? 'victory' : 'inhale';
     if (this.inhaling) return 'inhale';
     if (this.flying) return 'float';
     if (this.full) return this.grounded ? (this.walking ? 'fullWalk' : 'full') : 'fullJump';

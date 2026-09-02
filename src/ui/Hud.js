@@ -1,4 +1,4 @@
-import { heartIcon, kirbyFaceIcon, starIcon, crownIcon } from './icons.js';
+import { heartIcon, kirbyFaceIcon, starIcon, crownIcon, abilityIcon, abilityLabel, buttonGlyph } from './icons.js';
 
 /**
  * Heads-up display built from the 3D Kirby repo's icon set: a row of hearts,
@@ -35,6 +35,11 @@ export class Hud {
     const lives = div('kb-pill kb-hud-row', hud);
     div('kb-lives-face', lives, kirbyFaceIcon('kb-ico', 34));
     this.lives = div('kb-lives-n kb-out-sm', lives, 'x3');
+    div('kb-stars-ico', lives, starIcon('kb-ico', 26));
+    this.stars = div('kb-stars-n kb-out-sm', lives, '0');
+    this.abil = div('kb-pill kb-hud-row', hud);
+    this.abilIco = div('kb-abil-hud', this.abil, abilityIcon('none', 'kb-ico', 36));
+    this.abilName = div('kb-abil-name kb-out-sm kb-track', this.abil, 'Normal');
     this.mouth = div('kb-pill kb-hud-row', hud);
     div('kb-mouth-ico', this.mouth, starIcon('kb-ico', 26));
     this.mouthText = div('kb-mouth-t kb-out-sm kb-track', this.mouth, '');
@@ -50,6 +55,8 @@ export class Hud {
 
     this.banner = div('kb-banner kb-out kb-track', root, '');
     this.banner.hidden = true;
+    this.prompt = div('kb-pill kb-prompt', root, '<span class="kb-prompt-btn">' + buttonGlyph('B', '#ff7a8f', 24) + '</span><span class="kb-out-sm kb-track">Shop</span>');
+    this.prompt.hidden = true;
 
     const ev = game.events;
     ev.on('level:loaded', ({ name }) => {
@@ -114,6 +121,21 @@ export class Hud {
     if (this._last.lives !== livesText) {
       this._last.lives = livesText;
       this.lives.textContent = livesText;
+    }
+    if (this._last.stars !== p.stars) {
+      this._last.stars = p.stars;
+      this.stars.textContent = String(p.stars);
+    }
+    const abil = p.ability ?? 'none';
+    if (this._last.abil !== abil) {
+      this._last.abil = abil;
+      this.abilIco.innerHTML = abilityIcon(abil, 'kb-ico', 36);
+      this.abilName.textContent = abilityLabel(abil);
+    }
+    const prompt = !!p.nearShop && !this.game.paused;
+    if (this._last.prompt !== prompt) {
+      this._last.prompt = prompt;
+      this.prompt.hidden = !prompt;
     }
     const mouthText = p.full ? MOUTHFUL_NAMES[p.mouthful] ?? p.mouthful : '';
     if (this._last.mouth !== mouthText) {

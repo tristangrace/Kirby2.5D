@@ -18,6 +18,7 @@ export class WhispyWoods extends Enemy {
     this.hp = this.maxHp;
     this.contactDamage = 1;
     this.inhalable = false;
+    this.starDrop = 30;
     this.radius = 0.75;
     this.height = 2.4;
     this.facing = -1;
@@ -149,6 +150,7 @@ export class WhispyWoods extends Enemy {
         rise: 0.6,
       });
     }
+    this.dropStars();
     this.game.events.emit('boss:defeated', this);
     this.player?.onVictory?.();
   }

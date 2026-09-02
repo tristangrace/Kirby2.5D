@@ -92,6 +92,14 @@ export default {
     { type: 'waddleDee', col: 50, row: 10 },
     { type: 'maximTomato', col: 59, row: 25 },
 
+    // Shops
+    { type: 'shop', col: 4, row: 13 },
+    { type: 'shop', col: 52, row: 19 },
+
+    // Point stars lying about
+    ...[[9, 5], [12, 17], [15, 6], [4, 8], [13, 13], [24, 6], [33, 3], [37, 10], [26, 19], [31, 16], [36, 23], [24, 22],
+        [29, 8], [43, 6], [42, 18], [48, 4], [53, 26], [58, 22], [49, 14], [60, 5], [56, 3], [11, 10]].map(([col, row]) => ({ type: 'pointStar', col, row })),
+
     // Boss
     { type: 'whispyWoods', col: 60, row: 12 },
   ],

@@ -17,6 +17,7 @@ export class Enemy extends SpriteEntity {
     this.hp = 1;
     this.contactDamage = 1;
     this.inhalable = true;
+    this.starDrop = 1; // point stars popped out on defeat
     this.speed = 1.4;
     this.radius = 0.32;
     this.height = 0.9;
@@ -96,8 +97,16 @@ export class Enemy extends SpriteEntity {
 
   die(source) {
     this.game.spawn('effect', { kind: 'poof', x: this.position.x, y: this.position.y + 0.2, z: this.position.z });
+    this.dropStars();
     this.game.events.emit('enemy:defeated', this);
     this.destroy();
+  }
+
+  /** Pop `starDrop` point stars out of the body. */
+  dropStars(count = this.starDrop) {
+    for (let i = 0; i < count; i++) {
+      this.game.spawn('pointStar', { x: this.position.x, z: this.position.z, pop: true, life: 12 });
+    }
   }
 
   // ---------------------------------------------------------------- helpers

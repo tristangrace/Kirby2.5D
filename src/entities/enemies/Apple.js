@@ -15,6 +15,7 @@ export class Apple extends Enemy {
     this.inhalable = true;
     this.radius = 0.26;
     this.height = 0.5;
+    this.starDrop = 0;
     this.solid = false; // stars fly over resting apples instead of wasting themselves on them
     this.life = 14;
   }

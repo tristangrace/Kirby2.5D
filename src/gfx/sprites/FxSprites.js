@@ -191,3 +191,87 @@ export const getSparkleSheet = lazySheet(() =>
     animations: { idle: { fps: 10, loop: false, poses: [{ step: 0 }, { step: 1 }, { step: 2 }] } },
   }),
 );
+
+// ---------------------------------------------------------------- abilities and shop
+export const getSlashSheet = lazySheet(() =>
+  buildSheet({
+    width: 22,
+    height: 22,
+    draw: ({ step }) => {
+      const px = new PixelBuffer(22, 22);
+      const outer = px.ellipseMask(11, 11, 10, 10);
+      const inner = px.ellipseMask(7 - step, 11, 8.5, 9);
+      for (let i = 0; i < outer.length; i++) if (inner[i]) outer[i] = 0;
+      px.fillMask(outer, step ? '#dfeeff' : '#ffffff');
+      px.outlineMask(outer, '#5f8fc4');
+      return px;
+    },
+    animations: { idle: { fps: 12, loop: true, poses: [{ step: 0 }, { step: 1 }] } },
+  }),
+);
+
+export const getFlameSheet = lazySheet(() =>
+  buildSheet({
+    width: 12,
+    height: 12,
+    draw: ({ flick }) => {
+      const px = new PixelBuffer(12, 12);
+      const o = '#b8300f';
+      px.ellipse(6, 8, 4.2, 3.4, '#ff8a2a', o);
+      px.ellipse(6 + flick, 4.5, 2.4, 3.6, '#ffb03a', o);
+      px.ellipse(6, 8, 2, 2, '#fff1a8', null);
+      return px;
+    },
+    animations: { idle: { fps: 14, loop: true, poses: [{ flick: -1 }, { flick: 1 }] } },
+  }),
+);
+
+export const getPointStarSheet = lazySheet(() =>
+  buildSheet({
+    width: 10,
+    height: 10,
+    draw: ({ angle, bob }) => {
+      const px = new PixelBuffer(10, 10);
+      px.star(5, 5.3 + bob, 4.6, 2.0, '#ffe14a', OUTLINE, angle);
+      px.set(4, 4 + bob, '#fff8c0');
+      return px;
+    },
+    animations: { idle: { fps: 6, loop: true, poses: [{ angle: -1.571, bob: 0 }, { angle: -1.257, bob: -1 }, { angle: -0.942, bob: 0 }, { angle: -1.257, bob: -1 }] } },
+  }),
+);
+
+export const getShopSheet = lazySheet(() =>
+  buildSheet({
+    width: 36,
+    height: 36,
+    draw: ({ flag }) => {
+      const px = new PixelBuffer(36, 36);
+      // posts
+      px.rect(5, 12, 2, 20, '#8c5a2b');
+      px.rect(29, 12, 2, 20, '#8c5a2b');
+      px.rect(5, 12, 1, 20, '#6b4224');
+      px.rect(29, 12, 1, 20, '#6b4224');
+      // counter
+      px.rect(3, 23, 30, 10, '#c98c4e');
+      px.rect(3, 27, 30, 1, '#8c5a2b');
+      px.rect(3, 31, 30, 1, '#8c5a2b');
+      px.outlineMask(px.polygonMask([[3, 23], [33, 23], [33, 33], [3, 33]]), OUTLINE);
+      // wares
+      px.ellipse(11, 21.5, 2.4, 2.2, '#e8303c', OUTLINE);
+      px.ellipse(18, 21, 2.6, 2.4, '#e8303c', OUTLINE);
+      px.ellipse(18, 18.5, 2, 1, '#3fa63a', OUTLINE);
+      px.star(26, 20.5, 3.2, 1.4, '#ffe14a', OUTLINE);
+      // awning: striped trapezoid
+      const awn = px.polygonMask([[1, 5], [35, 5], [32, 13], [4, 13]]);
+      for (let i = 0; i < awn.length; i++) if (awn[i]) px.px[i] = ((i % 36) >> 2) % 2 ? '#ffffff' : '#e8303c';
+      px.outlineMask(awn, OUTLINE);
+      px.rect(3, 2, 30, 3, '#e8303c');
+      px.outlineMask(px.polygonMask([[3, 2], [33, 2], [33, 5], [3, 5]]), OUTLINE);
+      // little flag on top
+      px.rect(18, 0, 1, 3, '#6b4224');
+      px.rect(19, 0 + flag, 3, 2, '#ffcb2e');
+      return px;
+    },
+    animations: { idle: { fps: 3, loop: true, poses: [{ flag: 0 }, { flag: 1 }] } },
+  }),
+);
