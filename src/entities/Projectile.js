@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { SpriteEntity } from './SpriteEntity.js';
-import { getStarSheet, getPuffSheet, getSparkSheet, getAppleSheet, getSlashSheet, getFlameSheet } from '../gfx/sprites/FxSprites.js';
+import { getStarSheet, getPuffSheet, getSparkSheet, getAppleSheet, getSlashSheet, getFlameSheet, getBoltSheet } from '../gfx/sprites/FxSprites.js';
 
 /**
  * Something thrown, blown or swung: a spat star, Kirby's air puff, a beam
@@ -23,8 +23,8 @@ export class Projectile extends SpriteEntity {
     this.pierce = pierce;
     this.hit = pierce ? new Set() : null;
     this.airborne = true;
-    this.radius = kind === 'spark' ? 0.2 : kind === 'slash' ? 0.45 : 0.28;
-    this.height = kind === 'slash' ? 0.9 : 0.5;
+    this.radius = kind === 'spark' ? 0.2 : kind === 'slash' ? 0.45 : kind === 'bolt' ? 0.4 : 0.28;
+    this.height = kind === 'slash' ? 0.9 : kind === 'bolt' ? 1.8 : 0.5;
     if (y != null) this.position.y = y;
     this.shadow.visible = kind === 'apple';
     if (tint) this.material.color.set(tint);
@@ -46,6 +46,8 @@ export class Projectile extends SpriteEntity {
         return getSlashSheet();
       case 'flame':
         return getFlameSheet();
+      case 'bolt':
+        return getBoltSheet();
       default:
         throw new Error('Unknown projectile: ' + kind);
     }

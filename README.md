@@ -69,7 +69,7 @@ drifts stars over a dusk scrim and starts on any button, Enter, Start or a tap.
 Defeated enemies pop out point stars (Whispy drops a pile), and more lie
 around the level. Walk up to a market stall and press B to open the shop,
 which sells copy abilities using the 3D game's ability icons: Sword (30),
-Beam (25), Fire (40), Ice (35) and Spark (30). An equipped ability replaces
+Beam (25), Fire (40), Ice (35) and Spark (2, lightning strikes the ground around Kirby). An equipped ability replaces
 inhaling on B: Sword and Beam are single presses, Fire, Ice and Spark fire
 while B is held and root Kirby in place. Pick "Normal" to go back to
 inhaling. Stars and purchases are saved in localStorage.

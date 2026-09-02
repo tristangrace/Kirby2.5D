@@ -22,7 +22,7 @@ export const ABILITIES = {
   beam: { label: 'Beam', price: 25, hold: false, blurb: 'Whip a crackling arc of sparks.' },
   fire: { label: 'Fire', price: 40, hold: true, blurb: 'Breathe fire while B is held.' },
   ice: { label: 'Ice', price: 35, hold: true, blurb: 'Freezing breath that passes through foes.' },
-  spark: { label: 'Spark', price: 30, hold: true, blurb: 'Crackle with sparks all around you.' },
+  spark: { label: 'Spark', price: 2, hold: true, blurb: 'Call lightning down all around you.' },
 };
 
 /**
@@ -330,10 +330,20 @@ export class Player extends SpriteEntity {
       const spread = (Math.random() - 0.5) * 1.2;
       spawn({ kind: 'ice', tint: '#9ad9ff', x: m.x, y: m.y, z: m.z, vx: _dir.x * 4.2 - _dir.z * spread, vz: _dir.z * 4.2 + _dir.x * spread, life: 0.45, damage: 1, pierce: true, hitEffect: null });
     } else if (this.ability === 'spark') {
-      this.abilityTimer = 0.05;
-      const a = Math.random() * Math.PI * 2;
-      const r = 0.5 + Math.random() * 0.7;
-      spawn({ kind: 'spark', x: this.position.x + Math.cos(a) * r, y: this.position.y + 0.1 + Math.random() * 0.8, z: this.position.z + Math.sin(a) * r, life: 0.12, damage: 1, hitEffect: null });
+      // Lightning strikes the ground in a ring around him, plus a crackle on his body.
+      this.abilityTimer = 0.07;
+      for (let i = 0; i < 2; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = 0.9 + Math.random() * 1.5;
+        const bx = this.position.x + Math.cos(a) * r;
+        const bz = this.position.z + Math.sin(a) * r;
+        const ground = this.game.level.heightAt(bx, bz);
+        if (ground == null) continue;
+        spawn({ kind: 'bolt', x: bx, y: ground, z: bz, life: 0.14, damage: 1, pierce: true, hitEffect: null });
+        this.game.spawn('effect', { kind: 'hit', x: bx, y: ground + 0.05, z: bz });
+      }
+      const sa = Math.random() * Math.PI * 2;
+      spawn({ kind: 'spark', x: this.position.x + Math.cos(sa) * 0.5, y: this.position.y + 0.2 + Math.random() * 0.6, z: this.position.z + Math.sin(sa) * 0.5, life: 0.1, damage: 1, hitEffect: null });
     }
   }
 

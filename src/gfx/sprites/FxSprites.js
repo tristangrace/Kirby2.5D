@@ -275,3 +275,37 @@ export const getShopSheet = lazySheet(() =>
     animations: { idle: { fps: 3, loop: true, poses: [{ flag: 0 }, { flag: 1 }] } },
   }),
 );
+
+/** A lightning bolt striking the ground: tall zigzag, white core in a yellow sheath. */
+export const getBoltSheet = lazySheet(() =>
+  buildSheet({
+    width: 16,
+    height: 44,
+    draw: ({ seed }) => {
+      const px = new PixelBuffer(16, 44);
+      // zigzag from top to a strike point near the bottom
+      const pts = [];
+      let x = 8;
+      for (let y = 0; y <= 38; y += 6) {
+        pts.push([x, y]);
+        x = 4 + ((x * 7 + y * 3 + seed * 5) % 9);
+      }
+      pts.push([8, 40]);
+      for (let i = 0; i < pts.length - 1; i++) {
+        const [x0, y0] = pts[i];
+        const [x1, y1] = pts[i + 1];
+        for (const dx of [-1, 0, 1]) px.line(x0 + dx, y0, x1 + dx, y1, '#ffcb2e');
+      }
+      for (let i = 0; i < pts.length - 1; i++) {
+        const [x0, y0] = pts[i];
+        const [x1, y1] = pts[i + 1];
+        px.line(x0, y0, x1, y1, '#ffffff');
+      }
+      // ground flash
+      px.ellipse(8, 41, 6 - seed, 2, '#fff3a0', '#e0a020');
+      px.ellipse(8, 41, 2.5, 1, '#ffffff', null);
+      return px;
+    },
+    animations: { idle: { fps: 18, loop: true, poses: [{ seed: 0 }, { seed: 1 }, { seed: 2 }] } },
+  }),
+);
